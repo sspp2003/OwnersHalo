@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "62437051979",
+    "firebase_url": "https://messadminanduser-default-rtdb.firebaseio.com",
+    "project_id": "messadminanduser",
+    "storage_bucket": "messadminanduser.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62437051979:android:1132227651443fd13307ce",
+        "android_client_info": {
+          "package_name": "com.example.auntymess"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAS0Ser-OYHXXN47j-hhS3UP2XK9iTfy4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62437051979:android:949585f2612bf7a33307ce",
+        "android_client_info": {
+          "package_name": "com.example.mymess"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAS0Ser-OYHXXN47j-hhS3UP2XK9iTfy4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
