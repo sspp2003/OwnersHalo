@@ -1,10 +1,12 @@
 package com.example.mymess.Adapters
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.mymess.AttendanceActivity
 import com.example.mymess.Models.StudentItemModel
 import com.example.mymess.databinding.ListItemBinding
 
@@ -37,6 +39,13 @@ class StudentAdapter(private val items: MutableList<StudentItemModel>): Recycler
                 .load(stuitem.profileImage)
                 .apply(RequestOptions.circleCropTransform())
                 .into(binding.profilePic)
+
+            binding.root.setOnClickListener(){
+                val context = binding.root.context
+                val i = Intent(context,AttendanceActivity::class.java)
+                i.putExtra("userid",stuitem.userid)
+                context.startActivity(i)
+            }
         }
     }
 
