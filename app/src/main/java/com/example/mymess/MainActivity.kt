@@ -2,6 +2,7 @@ package com.example.mymess
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mymess.Adapters.StudentAdapter
 import com.example.mymess.Models.StudentItemModel
@@ -22,41 +23,50 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding=ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        mAdapter= StudentAdapter(stulist)
-        val recyclerView=binding.studentRecyclerView
-        recyclerView.adapter=mAdapter
-        recyclerView.layoutManager=LinearLayoutManager(this)
+        val recyclerView = binding.studentRecyclerView
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val currentUser=auth.currentUser
+        val currentUser = auth.currentUser
 
-            databaseReference.addValueEventListener(object : ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    stulist.clear()
-                    for(postsnapshot in snapshot.children){
-                        val userdata=postsnapshot.getValue(StudentItemModel::class.java)
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val stulist = mutableListOf<StudentItemModel>()
+                for (postSnapshot in snapshot.children) {
+                    val userData = postSnapshot.getValue(StudentItemModel::class.java)
 
-                        if(userdata!=null) {
-                            val username = userdata.name
-                            val userimage=userdata.profileImage
+                    if (userData != null) {
+                        val username = userData.name
+                        val userImage = userData.profileImage
 
-                            val stuitem=StudentItemModel(
-                                username,
-                                "",
-                                userimage
-                            )
-                            stulist.add(stuitem)
-                        }
+                        val stuitem = StudentItemModel(
+                            username,
+                            "",
+                            userImage
+                        )
+                        stulist.add(stuitem)
                     }
-                    mAdapter.notifyDataSetChanged()
                 }
+                val mAdapter = StudentAdapter(stulist)
+                recyclerView.adapter = mAdapter
 
-                override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
-                }
+                binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        return false
+                    }
 
-            })
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        mAdapter.filter(newText.orEmpty())
+                        return true
+                    }
+                })
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle onCancelled event if needed
+            }
+        })
     }
 }
