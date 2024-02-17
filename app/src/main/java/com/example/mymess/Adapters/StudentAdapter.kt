@@ -9,6 +9,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.mymess.AttendanceActivity
 import com.example.mymess.Models.StudentItemModel
 import com.example.mymess.databinding.ListItemBinding
+import com.google.android.play.integrity.internal.i
 
 class StudentAdapter(private val items: MutableList<StudentItemModel>): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
     private var filteredList = ArrayList<StudentItemModel>()
@@ -40,11 +41,12 @@ class StudentAdapter(private val items: MutableList<StudentItemModel>): Recycler
                 .apply(RequestOptions.circleCropTransform())
                 .into(binding.profilePic)
 
+            val userid=stuitem.userid
             binding.root.setOnClickListener(){
                 val context = binding.root.context
-                val i = Intent(context,AttendanceActivity::class.java)
-                i.putExtra("userid",stuitem.userid)
-                context.startActivity(i)
+                val intent = Intent(context,AttendanceActivity::class.java)
+                intent.putExtra("userid",userid)
+                context.startActivity(intent)
             }
         }
     }

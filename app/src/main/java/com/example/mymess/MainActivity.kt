@@ -40,9 +40,10 @@ class MainActivity : AppCompatActivity() {
                     if (userData != null) {
                         val username = userData.name
                         val userImage = userData.profileImage
+                        val userid=userData.userid
 
                         val stuitem = StudentItemModel(
-                            "",
+                            userid,
                             username,
                             "",
                             userImage
