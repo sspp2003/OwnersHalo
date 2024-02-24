@@ -1,5 +1,6 @@
 package com.example.mymess
 
+import android.app.DatePickerDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -59,7 +61,142 @@ class AttendanceActivity : AppCompatActivity() {
             selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)
             Log.d("AttendanceActivity", "Selected Date: $selectedDate")
         }
+        binding.editStart.setOnClickListener(){
+            showDatePickerDialog(userid)
+//            editstartDate(userid)
+            handlestartendDate(userid)
+        }
 
+        binding.editEnd.setOnClickListener(){
+            showDatePickerDialogForEndDate(userid)
+//            editendDate(userid)
+            handlestartendDate(userid)
+        }
+
+    }
+
+    private fun showDatePickerDialog(userid:String?) {
+        val currentDate = Calendar.getInstance()
+        val year = currentDate.get(Calendar.YEAR)
+        val month = currentDate.get(Calendar.MONTH)
+        val day = currentDate.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                // Update the TextView with the selected date
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(selectedYear, selectedMonth, selectedDay)
+
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val formattedDate = dateFormat.format(selectedDate.time)
+
+                binding.messStartDate.text = formattedDate
+
+                // Call editstartDate after the date is selected
+                editstartDate(userid)
+            },
+            year,
+            month,
+            day
+        )
+
+        datePickerDialog.show()
+    }
+
+    private fun showDatePickerDialogForEndDate(userid: String?){
+        val currentDate = Calendar.getInstance()
+        val year = currentDate.get(Calendar.YEAR)
+        val month = currentDate.get(Calendar.MONTH)
+        val day = currentDate.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                // Update the TextView with the selected date
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(selectedYear, selectedMonth, selectedDay)
+
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val formattedDate = dateFormat.format(selectedDate.time)
+
+                binding.messEndDate.text = formattedDate
+
+                editendDate(userid)
+            },
+            year,
+            month,
+            day
+        )
+
+        datePickerDialog.show()
+
+    }
+    private fun editendDate(userid: String?){
+        if(userid!=null){
+            val attendRef = databaseReference.child("attendance").child(userid)
+
+            attendRef.addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists()){
+                        val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
+                        if (attendanceData!=null){
+                            val newEndDate = binding.messEndDate.text.toString()
+//                            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+                            val updateAttendance = attendanceData.copy(
+                                endDate = newEndDate
+                            )
+                            attendRef.setValue(updateAttendance)
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
+        }
+    }
+
+    private fun editstartDate(userid: String?) {
+        if (userid != null) {
+            val attendRef = databaseReference.child("attendance").child(userid)
+
+            attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
+                        if (attendanceData != null) {
+                            val newStartDate = binding.messStartDate.text.toString()
+                            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+                            try {
+                                val startDate = dateFormat.parse(newStartDate)
+                                val calendar = Calendar.getInstance()
+                                calendar.time = startDate
+                                calendar.add(Calendar.DAY_OF_MONTH, 30)
+                                val endDate = calendar.time
+                                val formattedEndDate = dateFormat.format(endDate)
+
+                                val updateAttendance = attendanceData.copy(
+                                    startDate = newStartDate,
+                                    endDate = formattedEndDate
+                                )
+
+                                attendRef.setValue(updateAttendance)
+                            } catch (e: ParseException) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle cancellation
+                }
+            })
+        }
     }
 
     private fun handlestartendDate(userid: String?) {

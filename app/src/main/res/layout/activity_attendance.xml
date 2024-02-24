@@ -179,13 +179,13 @@
         android:id="@+id/messStartDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/startDate"
         android:layout_below="@id/frameLayout"
-        android:layout_marginTop="21dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="21dp"
+        android:layout_toRightOf="@id/startDate"
         android:text="12-14-2023"
         android:textSize="24dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/messEndDate"
@@ -200,6 +200,7 @@
         android:textStyle="bold"/>
 
     <ImageButton
+        android:id="@+id/editStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/messStartDate"
@@ -208,4 +209,16 @@
         android:layout_marginStart="8dp"
         android:background="@android:color/transparent"
         android:src="@drawable/edit_date"/>
+
+    <ImageButton
+        android:id="@+id/editEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editStart"
+        android:layout_marginLeft="23dp"
+        android:layout_marginTop="15dp"
+        android:layout_toRightOf="@+id/messEndDate"
+        android:background="@android:color/transparent"
+        android:src="@drawable/edit_date" />
+
 </RelativeLayout>
