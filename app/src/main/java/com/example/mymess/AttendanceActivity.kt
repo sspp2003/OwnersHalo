@@ -1,19 +1,26 @@
 package com.example.mymess
 
 import android.app.DatePickerDialog
+import android.app.Dialog
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Window
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.example.mymess.Models.AttendanceItemModel
+import com.example.mymess.Models.BalanceItemModel
 import com.example.mymess.databinding.ActivityAttendanceBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.getValue
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -73,7 +80,123 @@ class AttendanceActivity : AppCompatActivity() {
             handlestartendDate(userid)
         }
 
+        binding.addTobalanceBtn.setOnClickListener {
+            val presentcount=binding.presentCount.text.toString()
+            val pc=presentcount.toInt()
+            val absentcount=binding.absentCount.text.toString()
+            val ac=absentcount.toInt()
+            showDialogBalance(binding.messStartDate.text.toString(),binding.messEndDate.text.toString(),pc,userid)
+        }
     }
+
+    private fun showDialogBalance(startdate: String, enddate: String, pc: Int, userid: String?) {
+        val dialog= Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.setContentView(R.layout.balance_dialog)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val confirm_btn: Button=dialog.findViewById(R.id.btn_addtobalance)
+        val cancel: Button=dialog.findViewById(R.id.btn_cancel)
+        val messstartdate: TextView=dialog.findViewById(R.id.startDate)
+        val messenddate: TextView=dialog.findViewById(R.id.enddate)
+        val amount_et: EditText=dialog.findViewById(R.id.balanceamount_et)
+
+        messstartdate.text=startdate
+        messenddate.text=enddate
+
+        cancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        confirm_btn.setOnClickListener {
+            if (userid != null) {
+                val balanceRef = databaseReference.child("balance").child(userid)
+
+                balanceRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        var balanceAlreadyAdded = false
+                        var key: String? = null
+
+                        for (snapshot in dataSnapshot.children) {
+                            val balanceItem = snapshot.getValue(BalanceItemModel::class.java)
+
+                            if (balanceItem != null && balanceItem.startDate == startdate && balanceItem.endDate == enddate) {
+                                balanceAlreadyAdded = true
+                                key = snapshot.key
+                                break
+                            }
+                        }
+
+                        if (!balanceAlreadyAdded) {
+                            key = balanceRef.push().key
+                            if (key != null) {
+                                val balRef = balanceRef.child(key)
+                                val balanceItem = BalanceItemModel(
+                                    key,
+                                    startdate,
+                                    enddate,
+                                    amount_et.text.toString()
+                                )
+
+                                balRef.setValue(balanceItem).addOnSuccessListener {
+                                    val intent = Intent(this@AttendanceActivity, BalanceActivity::class.java)
+                                    startActivity(intent)
+                                    dialog.dismiss()
+                                }
+                            }
+                        } else {
+                            Toast.makeText(this@AttendanceActivity, "Balance already added", Toast.LENGTH_SHORT).show()
+                        }
+
+                        val attendRef = databaseReference.child("attendance").child(userid)
+
+                        attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
+
+                                    if (attendanceData != null) {
+                                        balanceRef.child(key ?: "").child("presentDates").setValue(attendanceData.presentDates)
+                                        balanceRef.child(key ?: "").child("absentDates").setValue(attendanceData.absentDates)
+                                    }
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+
+                            }
+                        })
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                        Toast.makeText(this@AttendanceActivity, "Error fetching data", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+        }
+
+        databaseReference.child("Rate").get().addOnSuccessListener { dataSnapshot ->
+
+            if (dataSnapshot.exists()) {
+                val rateDataString = dataSnapshot.value as? String
+                val rateDataInt = rateDataString?.toIntOrNull() ?: 0
+                val totalamount=pc*rateDataInt
+                val totalAmountString = totalamount.toString()
+
+                amount_et.setText(totalAmountString)
+            }
+            else{
+                Toast.makeText(this,"Please Set Rate",Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this,"unable to fetch data",Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
+
+    }
+
 
     private fun showDatePickerDialog(userid:String?) {
         val currentDate = Calendar.getInstance()

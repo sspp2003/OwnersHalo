@@ -7,11 +7,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.mymess.AttendanceActivity
+import com.example.mymess.MainActivity
 import com.example.mymess.Models.StudentItemModel
 import com.example.mymess.databinding.ListItemBinding
 import com.google.android.play.integrity.internal.i
 
-class StudentAdapter(private val items: MutableList<StudentItemModel>): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
+class StudentAdapter(private val items: MutableList<StudentItemModel>,
+                     private val fromBalanceActivity: Boolean): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
     private var filteredList = ArrayList<StudentItemModel>()
 
     init {
@@ -44,7 +46,11 @@ class StudentAdapter(private val items: MutableList<StudentItemModel>): Recycler
             val userid=stuitem.userid
             binding.root.setOnClickListener(){
                 val context = binding.root.context
-                val intent = Intent(context,AttendanceActivity::class.java)
+                val intent = if (fromBalanceActivity) {
+                    Intent(context, MainActivity::class.java)
+                } else {
+                    Intent(context, AttendanceActivity::class.java)
+                }
                 intent.putExtra("userid",userid)
                 context.startActivity(intent)
             }
@@ -63,6 +69,13 @@ class StudentAdapter(private val items: MutableList<StudentItemModel>): Recycler
                 }
             }
         }
+        notifyDataSetChanged()
+    }
+
+    fun update(balancelist: List<StudentItemModel>){
+        items.clear()
+        items.addAll(balancelist)
+
         notifyDataSetChanged()
     }
 }

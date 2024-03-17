@@ -221,4 +221,14 @@
         android:background="@android:color/transparent"
         android:src="@drawable/edit_date" />
 
+    <Button
+        android:id="@+id/addTobalance_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:layout_marginHorizontal="20dp"
+        android:background="@drawable/login2_background"
+        android:text="ADD TO BALANCE"
+        android:textColor="@color/white"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>
