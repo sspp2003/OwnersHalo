@@ -9,6 +9,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.mymess.AttendanceActivity
 import com.example.mymess.MainActivity
 import com.example.mymess.Models.StudentItemModel
+import com.example.mymess.StudentBalanceActivity
 import com.example.mymess.databinding.ListItemBinding
 import com.google.android.play.integrity.internal.i
 
@@ -47,7 +48,7 @@ class StudentAdapter(private val items: MutableList<StudentItemModel>,
             binding.root.setOnClickListener(){
                 val context = binding.root.context
                 val intent = if (fromBalanceActivity) {
-                    Intent(context, MainActivity::class.java)
+                    Intent(context, StudentBalanceActivity::class.java)
                 } else {
                     Intent(context, AttendanceActivity::class.java)
                 }

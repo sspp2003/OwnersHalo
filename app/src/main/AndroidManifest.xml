@@ -13,6 +13,9 @@
         android:theme="@style/NoBar"
         tools:targetApi="31">
         <activity
+            android:name=".StudentBalanceActivity"
+            android:exported="false" />
+        <activity
             android:name=".BalanceActivity"
             android:exported="false" />
         <activity
