@@ -47,12 +47,17 @@ class MainActivity : AppCompatActivity() {
             popmenu.setOnMenuItemClickListener {menuItem->
                 when(menuItem.itemId){
                     R.id.set_amount->{
-                        showDialogBox()
+                        showDialogBox1()
                         true
                     }
 
                     R.id.check_balance->{
                         startActivity(Intent(this@MainActivity,BalanceActivity::class.java))
+                        true
+                    }
+
+                    R.id.upi->{
+                        showDialogBox2()
                         true
                     }
 
@@ -111,7 +116,41 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showDialogBox() {
+    private fun showDialogBox2() {
+        val dialog= Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.setContentView(R.layout.upi_dialog)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val cancel_btn=dialog.findViewById<Button>(R.id.btn_cancel)
+        val confirm_btn=dialog.findViewById<Button>(R.id.btn_confirm)
+        val name=dialog.findViewById<EditText>(R.id.et_name)
+        val id=dialog.findViewById<EditText>(R.id.et_upiId)
+
+        cancel_btn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        confirm_btn.setOnClickListener {
+            if(name.text.isEmpty()){
+                Toast.makeText(this,"Please Enter Name",Toast.LENGTH_SHORT).show()
+            }
+
+            if (id.text.isEmpty()){
+                Toast.makeText(this,"Please Enter UPI Id",Toast.LENGTH_SHORT).show()
+            }
+
+            val nameInput=name.editableText.toString()
+            val idInput=id.editableText.toString()
+            dbRef.child("UPI").child("name").setValue(nameInput)
+            dbRef.child("UPI").child("UPI_id").setValue(idInput)
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun showDialogBox1() {
         val dialog= Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
