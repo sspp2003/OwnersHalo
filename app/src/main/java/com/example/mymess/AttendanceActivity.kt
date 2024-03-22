@@ -33,10 +33,10 @@ class AttendanceActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding=ActivityAttendanceBinding.inflate(layoutInflater)
+        binding = ActivityAttendanceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        databaseReference=FirebaseDatabase.getInstance().getReference()
+        databaseReference = FirebaseDatabase.getInstance().getReference()
 
         //Selected User
         val userid = intent.getStringExtra("userid")
@@ -48,77 +48,94 @@ class AttendanceActivity : AppCompatActivity() {
         handlestartendDate(userid)
 
         //Handling The Calender
+        //changed format to dd mm yyyy
         val calendar = Calendar.getInstance()
 
         selectedDate = String.format(
-            Locale.getDefault(), "%04d-%02d-%02d", calendar.get(Calendar.YEAR), calendar.get(
-                Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH))
+            Locale.getDefault(),
+            "%02d %02d %04d",
+            calendar.get(Calendar.DAY_OF_MONTH),
+            calendar.get(Calendar.MONTH) + 1,
+            calendar.get(Calendar.YEAR)
+        )
 
         binding.buttonMarkPresent.setOnClickListener {
-            HandlePresent(selectedDate,userid)
+            HandlePresent(selectedDate, userid)
             handlepresentabsentcount(userid)
         }
 
         binding.buttonMarkAbsent.setOnClickListener {
-            HandleAbsent(selectedDate,userid)
+            HandleAbsent(selectedDate, userid)
             handlepresentabsentcount(userid)
         }
 
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+            selectedDate = String.format(
+                Locale.getDefault(),
+                "%02d %02d %04d",
+                dayOfMonth,
+                month + 1,
+                year
+            )
             Log.d("AttendanceActivity", "Selected Date: $selectedDate")
         }
-        binding.editStart.setOnClickListener(){
+
+        binding.editStart.setOnClickListener() {
             showDatePickerDialog(userid)
 //            editstartDate(userid)
             handlestartendDate(userid)
         }
 
-        binding.editEnd.setOnClickListener(){
+        binding.editEnd.setOnClickListener() {
             showDatePickerDialogForEndDate(userid)
 //            editendDate(userid)
             handlestartendDate(userid)
         }
 
         binding.addTobalanceBtn.setOnClickListener {
-            val presentcount=binding.presentCount.text.toString()
-            val pc=presentcount.toInt()
-            val absentcount=binding.absentCount.text.toString()
-            val ac=absentcount.toInt()
-            showDialogBalance(binding.messStartDate.text.toString(),binding.messEndDate.text.toString(),pc,userid)
+            val presentcount = binding.presentCount.text.toString()
+            val pc = presentcount.toInt()
+            val absentcount = binding.absentCount.text.toString()
+            val ac = absentcount.toInt()
+            showDialogBalance(
+                binding.messStartDate.text.toString(),
+                binding.messEndDate.text.toString(),
+                pc,
+                userid
+            )
         }
 
         //Moving to PresentAbsent activity on clicking present and absent button
         binding.linear1.setOnClickListener {
-            val intent=Intent(this,PresentAbsentActivity::class.java)
-            intent.putExtra("action","present")
-            intent.putExtra("userid",userid)
+            val intent = Intent(this, PresentAbsentActivity::class.java)
+            intent.putExtra("action", "present")
+            intent.putExtra("userid", userid)
             startActivity(intent)
         }
 
         binding.linear2.setOnClickListener {
-            val intent=Intent(this,PresentAbsentActivity::class.java)
-            intent.putExtra("action","absent")
-            intent.putExtra("userid",userid)
+            val intent = Intent(this, PresentAbsentActivity::class.java)
+            intent.putExtra("action", "absent")
+            intent.putExtra("userid", userid)
             startActivity(intent)
         }
     }
 
     private fun showDialogBalance(startdate: String, enddate: String, pc: Int, userid: String?) {
-        val dialog= Dialog(this)
+        val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.balance_dialog)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        val confirm_btn: Button=dialog.findViewById(R.id.btn_addtobalance)
-        val cancel: Button=dialog.findViewById(R.id.btn_cancel)
-        val messstartdate: TextView=dialog.findViewById(R.id.startDate)
-        val messenddate: TextView=dialog.findViewById(R.id.enddate)
-        val amount_et: EditText=dialog.findViewById(R.id.balanceamount_et)
+        val confirm_btn: Button = dialog.findViewById(R.id.btn_addtobalance)
+        val cancel: Button = dialog.findViewById(R.id.btn_cancel)
+        val messstartdate: TextView = dialog.findViewById(R.id.startDate)
+        val messenddate: TextView = dialog.findViewById(R.id.enddate)
+        val amount_et: EditText = dialog.findViewById(R.id.balanceamount_et)
 
-        messstartdate.text=startdate
-        messenddate.text=enddate
+        messstartdate.text = startdate
+        messenddate.text = enddate
 
         cancel.setOnClickListener {
             dialog.dismiss()
@@ -155,13 +172,18 @@ class AttendanceActivity : AppCompatActivity() {
                                 )
 
                                 balRef.setValue(balanceItem).addOnSuccessListener {
-                                    val intent = Intent(this@AttendanceActivity, BalanceActivity::class.java)
+                                    val intent =
+                                        Intent(this@AttendanceActivity, BalanceActivity::class.java)
                                     startActivity(intent)
                                     dialog.dismiss()
                                 }
                             }
                         } else {
-                            Toast.makeText(this@AttendanceActivity, "Balance already added", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@AttendanceActivity,
+                                "Balance already added",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
 
                         val attendRef = databaseReference.child("attendance").child(userid)
@@ -169,11 +191,14 @@ class AttendanceActivity : AppCompatActivity() {
                         attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 if (snapshot.exists()) {
-                                    val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
+                                    val attendanceData =
+                                        snapshot.getValue(AttendanceItemModel::class.java)
 
                                     if (attendanceData != null) {
-                                        balanceRef.child(key ?: "").child("presentDates").setValue(attendanceData.presentDates)
-                                        balanceRef.child(key ?: "").child("absentDates").setValue(attendanceData.absentDates)
+                                        balanceRef.child(key ?: "").child("presentDates")
+                                            .setValue(attendanceData.presentDates)
+                                        balanceRef.child(key ?: "").child("absentDates")
+                                            .setValue(attendanceData.absentDates)
                                     }
                                 }
                             }
@@ -185,7 +210,11 @@ class AttendanceActivity : AppCompatActivity() {
                     }
 
                     override fun onCancelled(databaseError: DatabaseError) {
-                        Toast.makeText(this@AttendanceActivity, "Error fetching data", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@AttendanceActivity,
+                            "Error fetching data",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 })
             }
@@ -196,16 +225,15 @@ class AttendanceActivity : AppCompatActivity() {
             if (dataSnapshot.exists()) {
                 val rateDataString = dataSnapshot.value as? String
                 val rateDataInt = rateDataString?.toIntOrNull() ?: 0
-                val totalamount=pc*rateDataInt
+                val totalamount = pc * rateDataInt
                 val totalAmountString = totalamount.toString()
 
                 amount_et.setText(totalAmountString)
-            }
-            else{
-                Toast.makeText(this,"Please Set Rate",Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Please Set Rate", Toast.LENGTH_SHORT).show()
             }
         }.addOnFailureListener {
-            Toast.makeText(this,"unable to fetch data",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "unable to fetch data", Toast.LENGTH_SHORT).show()
         }
 
         dialog.show()
@@ -213,7 +241,7 @@ class AttendanceActivity : AppCompatActivity() {
     }
 
 
-    private fun showDatePickerDialog(userid:String?) {
+    private fun showDatePickerDialog(userid: String?) {
         val currentDate = Calendar.getInstance()
         val year = currentDate.get(Calendar.YEAR)
         val month = currentDate.get(Calendar.MONTH)
@@ -226,7 +254,7 @@ class AttendanceActivity : AppCompatActivity() {
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(selectedYear, selectedMonth, selectedDay)
 
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
                 val formattedDate = dateFormat.format(selectedDate.time)
 
                 binding.messStartDate.text = formattedDate
@@ -242,7 +270,7 @@ class AttendanceActivity : AppCompatActivity() {
         datePickerDialog.show()
     }
 
-    private fun showDatePickerDialogForEndDate(userid: String?){
+    private fun showDatePickerDialogForEndDate(userid: String?) {
         val currentDate = Calendar.getInstance()
         val year = currentDate.get(Calendar.YEAR)
         val month = currentDate.get(Calendar.MONTH)
@@ -255,7 +283,7 @@ class AttendanceActivity : AppCompatActivity() {
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(selectedYear, selectedMonth, selectedDay)
 
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
                 val formattedDate = dateFormat.format(selectedDate.time)
 
                 binding.messEndDate.text = formattedDate
@@ -270,15 +298,16 @@ class AttendanceActivity : AppCompatActivity() {
         datePickerDialog.show()
 
     }
-    private fun editendDate(userid: String?){
-        if(userid!=null){
+
+    private fun editendDate(userid: String?) {
+        if (userid != null) {
             val attendRef = databaseReference.child("attendance").child(userid)
 
-            attendRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.exists()){
+                    if (snapshot.exists()) {
                         val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
-                        if (attendanceData!=null){
+                        if (attendanceData != null) {
                             val newEndDate = binding.messEndDate.text.toString()
 //                            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
@@ -307,7 +336,7 @@ class AttendanceActivity : AppCompatActivity() {
                         val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
                         if (attendanceData != null) {
                             val newStartDate = binding.messStartDate.text.toString()
-                            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
                             try {
                                 val startDate = dateFormat.parse(newStartDate)
@@ -350,8 +379,8 @@ class AttendanceActivity : AppCompatActivity() {
                             binding.messEndDate.text = attendanceData.endDate
                         }
                     } else {
-                        binding.messStartDate.text=""
-                        binding.messEndDate.text=""
+                        binding.messStartDate.text = ""
+                        binding.messEndDate.text = ""
                     }
                 }
 
@@ -364,21 +393,20 @@ class AttendanceActivity : AppCompatActivity() {
     }
 
     private fun handlepresentabsentcount(userid: String?) {
-        if(userid!=null){
-            val attendRef=databaseReference.child("attendance").child(userid)
+        if (userid != null) {
+            val attendRef = databaseReference.child("attendance").child(userid)
 
-            attendRef.addValueEventListener(object : ValueEventListener{
+            attendRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.exists()){
+                    if (snapshot.exists()) {
                         val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
-                        if(attendanceData!=null){
-                            binding.presentCount.text=attendanceData.presentCount.toString()
-                            binding.absentCount.text=attendanceData.absentCount.toString()
+                        if (attendanceData != null) {
+                            binding.presentCount.text = attendanceData.presentCount.toString()
+                            binding.absentCount.text = attendanceData.absentCount.toString()
                         }
-                    }
-                    else{
-                        binding.presentCount.text="0"
-                        binding.absentCount.text="0"
+                    } else {
+                        binding.presentCount.text = "0"
+                        binding.absentCount.text = "0"
                     }
                 }
 
@@ -391,28 +419,33 @@ class AttendanceActivity : AppCompatActivity() {
     }
 
     private fun HandleAbsent(selectedDate: String, userid: String?) {
-        if(userid!=null){
-            val attendRef=databaseReference.child("attendance").child(userid)
+        // Format the selected date with "-" separator
+        val formattedDate = formatDate(selectedDate)
+
+        if (userid != null) {
+            val attendRef = databaseReference.child("attendance").child(userid)
 
             databaseReference.child("attendance").child(userid)
-                .addListenerForSingleValueEvent(object : ValueEventListener{
+                .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        if(snapshot.exists()){
+                        if (snapshot.exists()) {
                             val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
 
                             if (attendanceData != null) {
                                 val presentDates = attendanceData.presentDates ?: mutableListOf()
-                                val absentDates=attendanceData.absentDates?: mutableListOf()
+                                val absentDates = attendanceData.absentDates ?: mutableListOf()
 
-                                if (absentDates.contains(selectedDate)) {
+                                if (absentDates.contains(formattedDate)) {
                                     // Date already marked present
-                                    Toast.makeText(this@AttendanceActivity, "$selectedDate already marked absent", Toast.LENGTH_SHORT).show()
-                                }
-
-                                else if(presentDates.contains(selectedDate)){
+                                    Toast.makeText(
+                                        this@AttendanceActivity,
+                                        "$formattedDate already marked absent",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else if (presentDates.contains(formattedDate)) {
                                     //date already marked present
-                                    presentDates.remove(selectedDate)
-                                    absentDates.add(selectedDate)
+                                    presentDates.remove(formattedDate)
+                                    absentDates.add(formattedDate)
                                     val updatedAttendanceData = attendanceData.copy(
                                         absentDates = absentDates,
                                         absentCount = absentDates.size,
@@ -420,34 +453,37 @@ class AttendanceActivity : AppCompatActivity() {
                                         presentCount = presentDates.size
                                     )
                                     attendRef.setValue(updatedAttendanceData)
-                                    Toast.makeText(this@AttendanceActivity,"attendance marked absent on date $selectedDate"
-                                        ,Toast.LENGTH_SHORT).show()
-                                }
-
-                                else {
+                                    Toast.makeText(
+                                        this@AttendanceActivity,
+                                        "attendance marked absent on date $formattedDate",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
                                     // Date not marked absent, update the attendance data
-                                    absentDates.add(selectedDate)
+                                    absentDates.add(formattedDate)
                                     val updatedAttendanceData = attendanceData.copy(
                                         absentDates = absentDates,
                                         absentCount = absentDates.size
                                     )
                                     attendRef.setValue(updatedAttendanceData)
-                                    Toast.makeText(this@AttendanceActivity,"attendance marked absent on date $selectedDate"
-                                        ,Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        this@AttendanceActivity,
+                                        "attendance marked absent on date $formattedDate",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
-                        }
-
-                        else{
-                            val absentDates = mutableListOf(selectedDate)
-                            val currentdate= SimpleDateFormat("yyy-MM-dd").format(Date())
+                        } else {
+                            val absentDates = mutableListOf(formattedDate)
+                            val currentdate = SimpleDateFormat("dd-MM-yyyy").format(Date())
                             val currentDate = Calendar.getInstance()
                             currentDate.add(Calendar.DAY_OF_MONTH, 30)
                             val futureDate = currentDate.time
-                            val formattedFutureDate = SimpleDateFormat("yyyy-MM-dd").format(futureDate)
+                            val formattedFutureDate =
+                                SimpleDateFormat("dd-MM-yyyy").format(futureDate)
 
-                            val attItem=AttendanceItemModel(
-                                absentDates=absentDates,
+                            val attItem = AttendanceItemModel(
+                                absentDates = absentDates,
                                 absentCount = absentDates.size,
                                 startDate = currentdate,
                                 endDate = formattedFutureDate
@@ -457,7 +493,7 @@ class AttendanceActivity : AppCompatActivity() {
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        TODO("Not yet implemented")
+                        // Handle cancellation
                     }
 
                 })
@@ -465,82 +501,95 @@ class AttendanceActivity : AppCompatActivity() {
     }
 
     private fun HandlePresent(selectedDate: String, userid: String?) {
-        if(userid!=null){
-            val attendRef=databaseReference.child("attendance").child(userid)
+        // Format the selected date with "-" separator
+        val formattedDate = formatDate(selectedDate)
+
+        if (userid != null) {
+            val attendRef = databaseReference.child("attendance").child(userid)
 
             databaseReference.child("attendance").child(userid)
-                .addListenerForSingleValueEvent(object : ValueEventListener{
-                   override fun onDataChange(snapshot: DataSnapshot) {
-                       if(snapshot.exists()){
-                           val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
-                           if (attendanceData != null) {
-                               val presentDates = attendanceData.presentDates ?: mutableListOf()
-                               val absentDates=attendanceData.absentDates?: mutableListOf()
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
+                            if (attendanceData != null) {
+                                val presentDates = attendanceData.presentDates ?: mutableListOf()
+                                val absentDates = attendanceData.absentDates ?: mutableListOf()
 
-                               if (presentDates.contains(selectedDate)) {
-                                   // Date already marked present
-                                   Toast.makeText(this@AttendanceActivity, "$selectedDate already marked present"
-                                       , Toast.LENGTH_SHORT).show()
-                               }
+                                if (presentDates.contains(formattedDate)) {
+                                    // Date already marked present
+                                    Toast.makeText(
+                                        this@AttendanceActivity,
+                                        "$formattedDate already marked present",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else if (absentDates.contains(formattedDate)) {
+                                    //date already marked absent
+                                    absentDates.remove(formattedDate)
+                                    presentDates.add(formattedDate)
+                                    val updatedAttendanceData = attendanceData.copy(
+                                        absentDates = absentDates,
+                                        absentCount = absentDates.size,
+                                        presentDates = presentDates,
+                                        presentCount = presentDates.size
+                                    )
+                                    attendRef.setValue(updatedAttendanceData)
+                                    Toast.makeText(
+                                        this@AttendanceActivity,
+                                        "attendance marked present on date $formattedDate",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    // Date not marked present, update the attendance data
+                                    presentDates.add(formattedDate)
+                                    val updatedAttendanceData = attendanceData.copy(
+                                        presentDates = presentDates,
+                                        presentCount = presentDates.size
+                                    )
+                                    attendRef.setValue(updatedAttendanceData)
+                                    Toast.makeText(
+                                        this@AttendanceActivity,
+                                        "attendance marked present on date $formattedDate",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        } else {
+                            val presentDates = mutableListOf(formattedDate)
+                            val currentdate = SimpleDateFormat("dd-MM-yyyy").format(Date())
+                            val currentDate = Calendar.getInstance()
+                            currentDate.add(Calendar.DAY_OF_MONTH, 30)
+                            val futureDate = currentDate.time
+                            val formattedFutureDate =
+                                SimpleDateFormat("dd-MM-yyyy").format(futureDate)
 
-                               else if(absentDates.contains(selectedDate)){
-                                   //date already marked absent
-                                   absentDates.remove(selectedDate)
-                                   presentDates.add(selectedDate)
-                                   val updatedAttendanceData = attendanceData.copy(
-                                       absentDates = absentDates,
-                                       absentCount = absentDates.size,
-                                       presentDates = presentDates,
-                                       presentCount = presentDates.size
-                                   )
-                                   attendRef.setValue(updatedAttendanceData)
-                                   Toast.makeText(this@AttendanceActivity,"attendance marked present on date $selectedDate"
-                                       ,Toast.LENGTH_SHORT).show()
-                               }
+                            val attItem = AttendanceItemModel(
+                                presentDates = presentDates,
+                                absentDates = mutableListOf(),
+                                presentCount = presentDates.size,
+                                absentCount = 0,
+                                startDate = currentdate,
+                                endDate = formattedFutureDate
+                            )
+                            databaseReference.child("attendance").child(userid).setValue(attItem)
+                        }
+                    }
 
-                               else {
-                                   // Date not marked present, update the attendance data
-                                   presentDates.add(selectedDate)
-                                   val updatedAttendanceData = attendanceData.copy(
-                                       presentDates = presentDates,
-                                       presentCount = presentDates.size
-                                   )
-                                   attendRef.setValue(updatedAttendanceData)
-                                   Toast.makeText(this@AttendanceActivity,"attendance marked present on date $selectedDate"
-                                       ,Toast.LENGTH_SHORT).show()
-                               }
-                           }
-                       }
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle cancellation
+                    }
 
-                       else{
-                           val presentDates = mutableListOf(selectedDate)
-                           val currentdate= SimpleDateFormat("yyy-MM-dd").format(Date())
-                           val currentDate = Calendar.getInstance()
-                           currentDate.add(Calendar.DAY_OF_MONTH, 30)
-                           val futureDate = currentDate.time
-                           val formattedFutureDate = SimpleDateFormat("yyyy-MM-dd").format(futureDate)
-
-                           val attItem=AttendanceItemModel(
-                               presentDates = presentDates,
-                               absentDates = mutableListOf(),
-                               presentCount = presentDates.size,
-                               absentCount = 0,
-                               startDate = currentdate,
-                               endDate = formattedFutureDate
-                           )
-                           databaseReference.child("attendance").child(userid).setValue(attItem)
-                       }
-                   }
-
-                   override fun onCancelled(error: DatabaseError) {
-                       TODO("Not yet implemented")
-                   }
-
-               })
+                })
         }
     }
 
-    private fun getSelectedDateFromCalendar(): String {
-        return selectedDate
+    // Function to format the date with "-" separator
+    private fun formatDate(dateString: String): String {
+        val parts = dateString.split(" ")
+        return if (parts.size == 3) {
+            "${parts[0]}-${parts[1]}-${parts[2]}"
+        } else {
+            dateString
+        }
     }
 }
