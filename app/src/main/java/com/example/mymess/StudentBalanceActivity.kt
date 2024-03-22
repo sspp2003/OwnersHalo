@@ -1,8 +1,14 @@
 package com.example.mymess
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Window
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mymess.Adapters.BalanceAdapter
@@ -63,6 +69,11 @@ class StudentBalanceActivity : AppCompatActivity() {
                     }
 
             }
+
+            override fun OnEditBalClick(balitem: BalanceItemModel) {
+                val balid=balitem.balanceid
+                showDialog1(balid,userid)
+            }
         })
         recyclerView.adapter=mAdapter
 
@@ -101,5 +112,33 @@ class StudentBalanceActivity : AppCompatActivity() {
 
             })
         }
+    }
+
+    private fun showDialog1(balid: String?,userid: String) {
+        val dialog= Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.setContentView(R.layout.editbal_dialog)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val cancel_btn=dialog.findViewById<Button>(R.id.btn_cancel)
+        val confirm_btn=dialog.findViewById<Button>(R.id.btn_confirm)
+        val amount=dialog.findViewById<EditText>(R.id.et_amount)
+
+        cancel_btn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        confirm_btn.setOnClickListener {
+            if(amount.text.isEmpty()){
+                Toast.makeText(this,"Please Enter Balance",Toast.LENGTH_SHORT).show()
+            }
+            else{
+                val amountinput=amount.editableText.toString()
+                databaseReference.child("balance").child(userid).child(balid!!).child("balanceamount").setValue(amountinput)
+                dialog.dismiss()
+            }
+        }
+        dialog.show()
     }
 }

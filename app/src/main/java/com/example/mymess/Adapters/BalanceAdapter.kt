@@ -18,6 +18,7 @@ class BalanceAdapter(
 
     interface OnItemClickListener{
         fun OnPaidClick(balitem: BalanceItemModel)
+        fun OnEditBalClick(balitem: BalanceItemModel)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BalanceViewHolder {
@@ -40,6 +41,10 @@ class BalanceAdapter(
             binding.messStartDate.text=balitem.startDate
             binding.messEndDate.text=balitem.endDate
             binding.balanceAmount.text=balitem.balanceamount
+
+            binding.editBalance.setOnClickListener {
+                itemClickListener.OnEditBalClick(balitem)
+            }
 
             binding.paidBtn.setOnClickListener {
                 itemClickListener.OnPaidClick(balitem)

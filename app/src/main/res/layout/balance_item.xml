@@ -89,6 +89,7 @@
         app:layout_constraintTop_toTopOf="@+id/balance_tv" />
 
     <ImageButton
+        android:id="@+id/edit_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/balanceAmount"
