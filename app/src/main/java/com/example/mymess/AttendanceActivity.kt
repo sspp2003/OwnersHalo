@@ -87,6 +87,21 @@ class AttendanceActivity : AppCompatActivity() {
             val ac=absentcount.toInt()
             showDialogBalance(binding.messStartDate.text.toString(),binding.messEndDate.text.toString(),pc,userid)
         }
+
+        //Moving to PresentAbsent activity on clicking present and absent button
+        binding.linear1.setOnClickListener {
+            val intent=Intent(this,PresentAbsentActivity::class.java)
+            intent.putExtra("action","present")
+            intent.putExtra("userid",userid)
+            startActivity(intent)
+        }
+
+        binding.linear2.setOnClickListener {
+            val intent=Intent(this,PresentAbsentActivity::class.java)
+            intent.putExtra("action","absent")
+            intent.putExtra("userid",userid)
+            startActivity(intent)
+        }
     }
 
     private fun showDialogBalance(startdate: String, enddate: String, pc: Int, userid: String?) {

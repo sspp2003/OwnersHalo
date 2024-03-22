@@ -97,6 +97,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:orientation="vertical"
+                android:background="@drawable/present_oultinebox"
                 android:gravity="top|center_vertical">
 
                 <TextView
@@ -125,6 +126,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:orientation="vertical"
+                android:background="@drawable/absent_outlinebox"
                 android:gravity="top|center_vertical">
 
                 <TextView
