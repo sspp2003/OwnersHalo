@@ -41,6 +41,25 @@ class AttendanceActivity : AppCompatActivity() {
         //Selected User
         val userid = intent.getStringExtra("userid")
 
+        //putting name
+        if(userid!=null){
+            val nameRef=databaseReference.child("users").child(userid).child("name")
+
+            nameRef.addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists()){
+                        val name=snapshot.getValue(String::class.java)
+
+                        binding.attendName.text=name
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
+        }
+
         //updating the present and update count
         handlepresentabsentcount(userid)
 
@@ -58,6 +77,13 @@ class AttendanceActivity : AppCompatActivity() {
             calendar.get(Calendar.MONTH) + 1,
             calendar.get(Calendar.YEAR)
         )
+
+        //Handle Deleting of wrongly marked Dates
+
+        binding.deleteDate.setOnClickListener {
+            HandleDeleteDate(selectedDate,userid)
+            handlepresentabsentcount(userid)
+        }
 
         binding.buttonMarkPresent.setOnClickListener {
             HandlePresent(selectedDate, userid)
@@ -142,6 +168,7 @@ class AttendanceActivity : AppCompatActivity() {
         confirm_btn.setOnClickListener {
             if (userid != null) {
                 val balanceRef = databaseReference.child("balance").child(userid)
+                val attRef=databaseReference.child("attendance").child(userid)
 
                 balanceRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -175,6 +202,8 @@ class AttendanceActivity : AppCompatActivity() {
                                     startActivity(intent)
                                     dialog.dismiss()
                                 }
+
+                                attRef.removeValue()
                             }
                         } else {
                             Toast.makeText(
@@ -498,6 +527,59 @@ class AttendanceActivity : AppCompatActivity() {
         }
     }
 
+    private fun HandleDeleteDate(selectedDate: String, userid: String?) {
+        val formattedDate = formatDate(selectedDate)
+
+        if(userid!=null){
+            val attendRef = databaseReference.child("attendance").child(userid)
+
+            attendRef.addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists()){
+                        val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
+
+                        if(attendanceData!=null){
+                            val presentDates = attendanceData.presentDates ?: mutableListOf()
+                            val absentDates = attendanceData.absentDates ?: mutableListOf()
+
+                            if (presentDates.contains(formattedDate)){
+                                presentDates.remove(formattedDate)
+                                val updatedAttendanceData = attendanceData.copy(
+                                    presentDates = presentDates,
+                                    presentCount = presentDates.size
+                                )
+
+                                attendRef.setValue(updatedAttendanceData)
+                                Toast.makeText(this@AttendanceActivity,"$formattedDate removed",Toast.LENGTH_SHORT).show()
+
+                            }
+
+                            else if(absentDates.contains(formattedDate)){
+                                absentDates.remove(formattedDate)
+                                val updatedAttendanceData = attendanceData.copy(
+                                    absentDates = absentDates,
+                                    absentCount = absentDates.size
+                                )
+
+                                attendRef.setValue(updatedAttendanceData)
+                                Toast.makeText(this@AttendanceActivity,"$formattedDate removed",Toast.LENGTH_SHORT).show()
+
+                            }
+
+                            else{
+                                Toast.makeText(this@AttendanceActivity,"Date Not Marked",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+
+            })
+        }
+    }
     private fun HandlePresent(selectedDate: String, userid: String?) {
         // Format the selected date with "-" separator
         val formattedDate = formatDate(selectedDate)

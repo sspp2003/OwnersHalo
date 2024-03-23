@@ -27,26 +27,7 @@ class AbsentActivity : AppCompatActivity() {
         val userid = intent.getStringExtra("userid")
 
         if (userid != null) {
-            mAdapter = AbsentAdapter(attlist, object : AbsentAdapter.OnItemClickListener {
-                override fun onDeleteClick(date: String) {
-                    val dateRef = databaseReference.child("attendance").child(userid).child("absentDates").orderByValue().equalTo(date)
-                    dateRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            if (snapshot.exists()) {
-                                for (childSnapshot in snapshot.children) {
-                                    childSnapshot.ref.removeValue()
-                                }
-
-                                updateAbsentCount(userid)
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            // Handle error
-                        }
-                    })
-                }
-            })
+            mAdapter = AbsentAdapter(attlist)
 
             val recyclerview = binding.attDatesRecyclerview
             recyclerview.layoutManager = LinearLayoutManager(this)
@@ -78,19 +59,5 @@ class AbsentActivity : AppCompatActivity() {
             })
 
         }
-    }
-
-    private fun updateAbsentCount(userid: String) {
-        val presentDatesRef = databaseReference.child("attendance").child(userid).child("absentDates")
-        presentDatesRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val absentCount = snapshot.childrenCount.toInt()
-                databaseReference.child("attendance").child(userid).child("absentCount").setValue(absentCount)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-        })
     }
 }

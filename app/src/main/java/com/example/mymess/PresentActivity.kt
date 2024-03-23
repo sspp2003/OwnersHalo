@@ -31,26 +31,7 @@ class PresentActivity : AppCompatActivity() {
         val userid=intent.getStringExtra("userid")
 
         if (userid!=null){
-            mAdapter= PresentAdapter(attlist,object :PresentAdapter.OnItemClickListener{
-                override fun onDeleteClick(date: String) {
-                    val dateRef = databaseReference.child("attendance").child(userid).child("presentDates").orderByValue().equalTo(date)
-                    dateRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            if (snapshot.exists()) {
-                                for (childSnapshot in snapshot.children) {
-                                    childSnapshot.ref.removeValue()
-                                }
-
-                                updatePresentCount(userid)
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            // Handle error
-                        }
-                    })
-                }
-            })
+            mAdapter= PresentAdapter(attlist)
 
             val recyclerview = binding.attDatesRecyclerview
             recyclerview.layoutManager = LinearLayoutManager(this)
@@ -83,19 +64,5 @@ class PresentActivity : AppCompatActivity() {
             })
 
         }
-    }
-
-    private fun updatePresentCount(userid: String) {
-        val presentDatesRef = databaseReference.child("attendance").child(userid).child("presentDates")
-        presentDatesRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val presentCount = snapshot.childrenCount.toInt()
-                databaseReference.child("attendance").child(userid).child("presentCount").setValue(presentCount)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-        })
     }
 }

@@ -7,13 +7,8 @@ import com.example.mymess.Models.AttendanceItemModel
 import com.example.mymess.databinding.PresentItemBinding
 
 class PresentAdapter(
-    private val items: MutableList<AttendanceItemModel>,
-    private val itemClickListener: OnItemClickListener
-): RecyclerView.Adapter<PresentAdapter.PresentViewHolder>() {
-
-    interface OnItemClickListener {
-        fun onDeleteClick(date: String)
-    }
+    private val items: MutableList<AttendanceItemModel>
+) : RecyclerView.Adapter<PresentAdapter.PresentViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresentViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -26,26 +21,16 @@ class PresentAdapter(
     }
 
     override fun onBindViewHolder(holder: PresentViewHolder, position: Int) {
-        val presentDates = items.flatMap { it.presentDates.orEmpty() }
-        val date = presentDates[position]
-        holder.bind(date)
+        val item = items.flatMap { it.presentDates.orEmpty() }
+        holder.bind(item.getOrNull(position))
     }
 
-    inner class PresentViewHolder(private val binding: PresentItemBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class PresentViewHolder(private val binding: PresentItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
-        init {
-            binding.deleteDate.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val presentDates = items.flatMap { it.presentDates.orEmpty() }
-                    val date = presentDates[position]
-                    itemClickListener.onDeleteClick(date)
-                }
-            }
-        }
-
-        fun bind(date: String) {
-            binding.PresentDate.text = date
+        fun bind(date: String?) {
+            // Check if date is not null before binding
+            date?.let { binding.PresentDate.text = it }
         }
     }
 }
