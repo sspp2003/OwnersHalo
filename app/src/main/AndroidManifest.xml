@@ -13,7 +13,10 @@
         android:theme="@style/NoBar"
         tools:targetApi="31">
         <activity
-            android:name=".PresentAbsentActivity"
+            android:name=".AbsentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PresentActivity"
             android:exported="false" />
         <activity
             android:name=".StudentBalanceActivity"

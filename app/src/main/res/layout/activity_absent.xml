@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="18dp"
-    tools:context=".PresentAbsentActivity">
+    tools:context=".AbsentActivity">
 
     <TextView
         android:id="@+id/presentabsent_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="PRESENT DATES"
+        android:text="ABSENT DATES"
         android:textAlignment="center"
         android:textSize="30sp"
         android:textColor="@color/black"
@@ -27,5 +27,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/presentabsent_tv"
-        tools:listitem="@layout/present_item"/>
+        tools:listitem="@layout/absent_item"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

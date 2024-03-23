@@ -1,11 +1,11 @@
 package com.example.mymess
 
-import PresentAbsentAdapter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.Adapters.PresentAdapter
 import com.example.mymess.Models.AttendanceItemModel
-import com.example.mymess.databinding.ActivityPresentAbsentBinding
+import com.example.mymess.databinding.ActivityPresentBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -13,30 +13,44 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class PresentAbsentActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityPresentAbsentBinding
+class PresentActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityPresentBinding
     private lateinit var auth: FirebaseAuth
     private var attlist= mutableListOf<AttendanceItemModel>()
     private lateinit var databaseReference: DatabaseReference
-    private lateinit var mAdapter: PresentAbsentAdapter
+    private lateinit var mAdapter: PresentAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding=ActivityPresentAbsentBinding.inflate(layoutInflater)
+        binding=ActivityPresentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         auth=FirebaseAuth.getInstance()
         databaseReference= FirebaseDatabase.getInstance().getReference()
 
         val userid=intent.getStringExtra("userid")
-        val action=intent.getStringExtra("action")
 
-        if(userid!=null){
-            if (action == "present") {
-                mAdapter = PresentAbsentAdapter(attlist, true)
-            } else {
-                binding.presentabsentTv.text="ABSENT DATES"
-                mAdapter = PresentAbsentAdapter(attlist, false)
-            }
+        if (userid!=null){
+            mAdapter= PresentAdapter(attlist,object :PresentAdapter.OnItemClickListener{
+                override fun onDeleteClick(date: String) {
+                    val dateRef = databaseReference.child("attendance").child(userid).child("presentDates").orderByValue().equalTo(date)
+                    dateRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                for (childSnapshot in snapshot.children) {
+                                    childSnapshot.ref.removeValue()
+                                }
+
+                                updatePresentCount(userid)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // Handle error
+                        }
+                    })
+                }
+            })
 
             val recyclerview = binding.attDatesRecyclerview
             recyclerview.layoutManager = LinearLayoutManager(this)
@@ -67,6 +81,21 @@ class PresentAbsentActivity : AppCompatActivity() {
                 }
 
             })
+
         }
+    }
+
+    private fun updatePresentCount(userid: String) {
+        val presentDatesRef = databaseReference.child("attendance").child(userid).child("presentDates")
+        presentDatesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val presentCount = snapshot.childrenCount.toInt()
+                databaseReference.child("attendance").child(userid).child("presentCount").setValue(presentCount)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
     }
 }

@@ -107,15 +107,13 @@ class AttendanceActivity : AppCompatActivity() {
 
         //Moving to PresentAbsent activity on clicking present and absent button
         binding.linear1.setOnClickListener {
-            val intent = Intent(this, PresentAbsentActivity::class.java)
-            intent.putExtra("action", "present")
+            val intent = Intent(this, PresentActivity::class.java)
             intent.putExtra("userid", userid)
             startActivity(intent)
         }
 
         binding.linear2.setOnClickListener {
-            val intent = Intent(this, PresentAbsentActivity::class.java)
-            intent.putExtra("action", "absent")
+            val intent = Intent(this, AbsentActivity::class.java)
             intent.putExtra("userid", userid)
             startActivity(intent)
         }
