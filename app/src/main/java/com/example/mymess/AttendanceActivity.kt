@@ -486,18 +486,40 @@ class AttendanceActivity : AppCompatActivity() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
-                                    // Date not marked absent, update the attendance data
-                                    absentDates.add(formattedDate)
-                                    val updatedAttendanceData = attendanceData.copy(
-                                        absentDates = absentDates,
-                                        absentCount = absentDates.size
-                                    )
-                                    attendRef.setValue(updatedAttendanceData)
-                                    Toast.makeText(
-                                        this@AttendanceActivity,
-                                        "attendance marked absent on date $formattedDate",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    // Check if the selected date is the day after messEndDate
+                                    val endDateString = binding.messEndDate.text.toString()
+                                    val endDate = SimpleDateFormat("dd-MM-yyyy").parse(endDateString)
+
+                                    val calendar = Calendar.getInstance()
+                                    calendar.time = endDate
+                                    calendar.add(Calendar.DAY_OF_MONTH, 1) // Add one day to endDate
+
+                                    val nextDayAfterEnd = calendar.time
+                                    val nextDayAfterEndFormatted =
+                                        SimpleDateFormat("dd-MM-yyyy").format(nextDayAfterEnd)
+
+                                    val selectedDateFormat = SimpleDateFormat("dd-MM-yyyy").parse(formattedDate)
+                                    if (selectedDateFormat.after(endDate) || formattedDate == nextDayAfterEndFormatted) {
+                                        // The selected date is after endDate or the next day after endDate
+                                        Toast.makeText(
+                                            this@AttendanceActivity,
+                                            "Please add to balance",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }else {
+                                        // Date not marked absent, update the attendance data
+                                        absentDates.add(formattedDate)
+                                        val updatedAttendanceData = attendanceData.copy(
+                                            absentDates = absentDates,
+                                            absentCount = absentDates.size
+                                        )
+                                        attendRef.setValue(updatedAttendanceData)
+                                        Toast.makeText(
+                                            this@AttendanceActivity,
+                                            "attendance marked absent on date $formattedDate",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             }
                         } else {
@@ -620,18 +642,40 @@ class AttendanceActivity : AppCompatActivity() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
-                                    // Date not marked present, update the attendance data
-                                    presentDates.add(formattedDate)
-                                    val updatedAttendanceData = attendanceData.copy(
-                                        presentDates = presentDates,
-                                        presentCount = presentDates.size
-                                    )
-                                    attendRef.setValue(updatedAttendanceData)
-                                    Toast.makeText(
-                                        this@AttendanceActivity,
-                                        "attendance marked present on date $formattedDate",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    // Check if the selected date is the day after messEndDate
+                                    val endDateString = binding.messEndDate.text.toString()
+                                    val endDate = SimpleDateFormat("dd-MM-yyyy").parse(endDateString)
+
+                                    val calendar = Calendar.getInstance()
+                                    calendar.time = endDate
+                                    calendar.add(Calendar.DAY_OF_MONTH, 1) // Add one day to endDate
+
+                                    val nextDayAfterEnd = calendar.time
+                                    val nextDayAfterEndFormatted =
+                                        SimpleDateFormat("dd-MM-yyyy").format(nextDayAfterEnd)
+
+                                    val selectedDateFormat = SimpleDateFormat("dd-MM-yyyy").parse(formattedDate)
+                                    if (selectedDateFormat.after(endDate) || formattedDate == nextDayAfterEndFormatted) {
+                                        // The selected date is after endDate or the next day after endDate
+                                        Toast.makeText(
+                                            this@AttendanceActivity,
+                                            "Please add to balance",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        // Date not marked present, update the attendance data
+                                        presentDates.add(formattedDate)
+                                        val updatedAttendanceData = attendanceData.copy(
+                                            presentDates = presentDates,
+                                            presentCount = presentDates.size
+                                        )
+                                        attendRef.setValue(updatedAttendanceData)
+                                        Toast.makeText(
+                                            this@AttendanceActivity,
+                                            "attendance marked present on date $formattedDate",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             }
                         } else {
