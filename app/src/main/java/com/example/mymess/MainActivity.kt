@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mymess.Adapters.StudentAdapter
 import com.example.mymess.Models.StudentItemModel
 import com.example.mymess.databinding.ActivityMainBinding
+import com.google.android.play.integrity.internal.s
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -53,6 +54,16 @@ class MainActivity : AppCompatActivity() {
 
                     R.id.check_balance->{
                         startActivity(Intent(this@MainActivity,BalanceActivity::class.java))
+                        true
+                    }
+
+                    R.id.today_present->{
+                        startActivity(Intent(this@MainActivity,TodayPresentActivity::class.java))
+                        true
+                    }
+
+                    R.id.today_absent->{
+                        startActivity(Intent(this@MainActivity,TodayAbsentActivity::class.java))
                         true
                     }
 

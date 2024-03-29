@@ -6,6 +6,12 @@
     <item android:id="@+id/check_balance"
         android:title="Balance Amounts"/>
 
+    <item android:id="@+id/today_present"
+        android:title="Today's Present List"/>
+
+    <item android:id="@+id/today_absent"
+        android:title="Today's Absent List"/>
+
     <item android:id="@+id/upi"
         android:title="UPI info"/>
 </menu>
