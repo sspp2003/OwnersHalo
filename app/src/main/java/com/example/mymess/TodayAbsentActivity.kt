@@ -26,6 +26,10 @@ class TodayAbsentActivity : AppCompatActivity() {
         binding = ActivityTodayAbsentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            recreate()
+        }
+
         auth = FirebaseAuth.getInstance()
         databaseReference = FirebaseDatabase.getInstance().getReference()
 
@@ -57,6 +61,7 @@ class TodayAbsentActivity : AppCompatActivity() {
                         }
                     }
                 }
+                binding.swipeRefreshLayout.isRefreshing = false
             }
 
             override fun onCancelled(error: DatabaseError) {

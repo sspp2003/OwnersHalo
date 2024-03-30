@@ -2,6 +2,7 @@ package com.example.mymess
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -14,6 +15,8 @@ class BalanceActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBalanceBinding
     private lateinit var recyclerView:RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private var databaseReference=FirebaseDatabase.getInstance().reference.child("users")
+    private lateinit var adapter: StudentAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,7 @@ class BalanceActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         fetchDataFromDatabase()
+
     }
 
     private fun fetchDataFromDatabase(){
@@ -69,6 +73,7 @@ class BalanceActivity : AppCompatActivity() {
                                     val mAdapter = StudentAdapter(stulist, true)
                                     recyclerView.adapter = mAdapter
                                     mAdapter.update(stulist) // Call update() function here
+
                                 }
                             }
                         }
