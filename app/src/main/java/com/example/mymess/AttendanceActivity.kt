@@ -203,6 +203,30 @@ class AttendanceActivity : AppCompatActivity() {
                                     dialog.dismiss()
                                 }
 
+                                //Adding present dates and absent dates to balance node
+
+                                val attendRef = databaseReference.child("attendance").child(userid)
+
+                                attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            val attendanceData =
+                                                snapshot.getValue(AttendanceItemModel::class.java)
+
+                                            if (attendanceData != null) {
+                                                balanceRef.child(key ?: "").child("presentDates")
+                                                    .setValue(attendanceData.presentDates)
+                                                balanceRef.child(key ?: "").child("absentDates")
+                                                    .setValue(attendanceData.absentDates)
+                                            }
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+
+                                    }
+                                })
+
                                 attRef.removeValue()
                             }
                         } else {
@@ -213,27 +237,7 @@ class AttendanceActivity : AppCompatActivity() {
                             ).show()
                         }
 
-                        val attendRef = databaseReference.child("attendance").child(userid)
 
-                        attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if (snapshot.exists()) {
-                                    val attendanceData =
-                                        snapshot.getValue(AttendanceItemModel::class.java)
-
-                                    if (attendanceData != null) {
-                                        balanceRef.child(key ?: "").child("presentDates")
-                                            .setValue(attendanceData.presentDates)
-                                        balanceRef.child(key ?: "").child("absentDates")
-                                            .setValue(attendanceData.absentDates)
-                                    }
-                                }
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-
-                            }
-                        })
                     }
 
                     override fun onCancelled(databaseError: DatabaseError) {
