@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Build.VERSION_CODES.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +17,7 @@ import android.widget.Toast
 import com.example.mymess.Models.AttendanceItemModel
 import com.example.mymess.Models.BalanceItemModel
 import com.example.mymess.databinding.ActivityAttendanceBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -30,6 +32,7 @@ import java.util.Locale
 class AttendanceActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAttendanceBinding
     private var selectedDate: String = ""
+    private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,11 +42,13 @@ class AttendanceActivity : AppCompatActivity() {
         databaseReference = FirebaseDatabase.getInstance().getReference()
 
         //Selected User
+        auth=FirebaseAuth.getInstance()
         val userid = intent.getStringExtra("userid")
+        val currentUserid=auth.currentUser!!.uid
 
         //putting name
         if(userid!=null){
-            val nameRef=databaseReference.child("users").child(userid).child("name")
+            val nameRef=databaseReference.child("MessOwners").child(currentUserid).child("users").child(userid).child("name")
 
             nameRef.addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -167,8 +172,8 @@ class AttendanceActivity : AppCompatActivity() {
 
         confirm_btn.setOnClickListener {
             if (userid != null) {
-                val balanceRef = databaseReference.child("balance").child(userid)
-                val attRef=databaseReference.child("attendance").child(userid)
+                val balanceRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("balance").child(userid)
+                val attRef=databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
                 balanceRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -205,7 +210,7 @@ class AttendanceActivity : AppCompatActivity() {
 
                                 //Adding present dates and absent dates to balance node
 
-                                val attendRef = databaseReference.child("attendance").child(userid)
+                                val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
                                 attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -251,7 +256,7 @@ class AttendanceActivity : AppCompatActivity() {
             }
         }
 
-        databaseReference.child("Rate").get().addOnSuccessListener { dataSnapshot ->
+        databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("Rate").get().addOnSuccessListener { dataSnapshot ->
 
             if (dataSnapshot.exists()) {
                 val rateDataString = dataSnapshot.value as? String
@@ -332,7 +337,7 @@ class AttendanceActivity : AppCompatActivity() {
 
     private fun editendDate(userid: String?) {
         if (userid != null) {
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
             attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -359,7 +364,7 @@ class AttendanceActivity : AppCompatActivity() {
 
     private fun editstartDate(userid: String?) {
         if (userid != null) {
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
             attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -399,7 +404,7 @@ class AttendanceActivity : AppCompatActivity() {
 
     private fun handlestartendDate(userid: String?) {
         if (userid != null) {
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
             attendRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -425,7 +430,7 @@ class AttendanceActivity : AppCompatActivity() {
 
     private fun handlepresentabsentcount(userid: String?) {
         if (userid != null) {
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
             attendRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -454,10 +459,9 @@ class AttendanceActivity : AppCompatActivity() {
         val formattedDate = formatDate(selectedDate)
 
         if (userid != null) {
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
-            databaseReference.child("attendance").child(userid)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
+                attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
                             val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
@@ -541,7 +545,7 @@ class AttendanceActivity : AppCompatActivity() {
                                 startDate = currentdate,
                                 endDate = formattedFutureDate
                             )
-                            databaseReference.child("attendance").child(userid).setValue(attItem)
+                            databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid).setValue(attItem)
                         }
                     }
 
@@ -557,7 +561,7 @@ class AttendanceActivity : AppCompatActivity() {
         val formattedDate = formatDate(selectedDate)
 
         if(userid!=null){
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
             attendRef.addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -611,10 +615,9 @@ class AttendanceActivity : AppCompatActivity() {
         val formattedDate = formatDate(selectedDate)
 
         if (userid != null) {
-            val attendRef = databaseReference.child("attendance").child(userid)
+            val attendRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
-            databaseReference.child("attendance").child(userid)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
+            attendRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
                             val attendanceData = snapshot.getValue(AttendanceItemModel::class.java)
@@ -699,7 +702,7 @@ class AttendanceActivity : AppCompatActivity() {
                                 startDate = currentdate,
                                 endDate = formattedFutureDate
                             )
-                            databaseReference.child("attendance").child(userid).setValue(attItem)
+                            databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid).setValue(attItem)
                         }
                     }
 

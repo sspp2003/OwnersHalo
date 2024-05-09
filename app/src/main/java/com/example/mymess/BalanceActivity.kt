@@ -9,19 +9,22 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.mymess.Adapters.StudentAdapter
 import com.example.mymess.Models.StudentItemModel
 import com.example.mymess.databinding.ActivityBalanceBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class BalanceActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBalanceBinding
     private lateinit var recyclerView:RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private var databaseReference=FirebaseDatabase.getInstance().reference.child("users")
+    private lateinit var auth: FirebaseAuth
     private lateinit var adapter: StudentAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBalanceBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        auth=FirebaseAuth.getInstance()
 
         swipeRefreshLayout = binding.swipeRefreshLayout
         swipeRefreshLayout.setOnRefreshListener {
@@ -37,7 +40,7 @@ class BalanceActivity : AppCompatActivity() {
     }
 
     private fun fetchDataFromDatabase(){
-        val balanceRef = FirebaseDatabase.getInstance().reference.child("balance")
+        val balanceRef = FirebaseDatabase.getInstance().reference.child("MessOwners").child(auth.currentUser!!.uid).child("balance")
         balanceRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val stulist = mutableListOf<StudentItemModel>()
@@ -47,7 +50,7 @@ class BalanceActivity : AppCompatActivity() {
                     val userId = userSnapshot.key
 
                     // Fetch user details (name and image URL) based on the user ID
-                    val userRef = FirebaseDatabase.getInstance().reference.child("users").child(userId!!)
+                    val userRef = FirebaseDatabase.getInstance().reference.child("MessOwners").child(auth.currentUser!!.uid).child("users").child(userId!!)
                     userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(userSnapshot: DataSnapshot) {
                             userCount++

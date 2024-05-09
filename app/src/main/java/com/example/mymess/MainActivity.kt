@@ -6,9 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.ContextMenu
-import android.view.MenuItem
-import android.view.View
+import android.util.Log
 import android.view.Window
 import android.widget.Button
 import android.widget.EditText
@@ -19,11 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mymess.Adapters.StudentAdapter
 import com.example.mymess.Models.StudentItemModel
 import com.example.mymess.databinding.ActivityMainBinding
-import com.google.android.play.integrity.internal.s
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
@@ -31,7 +27,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var stulist= mutableListOf<StudentItemModel>()
     private var auth=FirebaseAuth.getInstance()
-    private var databaseReference=FirebaseDatabase.getInstance().reference.child("users")
     private var dbRef=FirebaseDatabase.getInstance().getReference()
     private lateinit var mAdapter: StudentAdapter
 
@@ -40,6 +35,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val messOwnerid=intent.getStringExtra("messid")
+        val messName=intent.getStringExtra("messname")
+        Log.d("TAG","$messName")
 
         binding.menuBar.setOnClickListener {view->
             val popmenu=PopupMenu(this@MainActivity,view)
@@ -48,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             popmenu.setOnMenuItemClickListener {menuItem->
                 when(menuItem.itemId){
                     R.id.set_amount->{
-                        showDialogBox1()
+                        showDialogBox1(messName,messOwnerid)
                         true
                     }
 
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     R.id.upi->{
-                        showDialogBox2()
+                        showDialogBox2(messOwnerid)
                         true
                     }
 
@@ -84,15 +82,18 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = binding.studentRecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val currentUser = auth.currentUser
 
-        databaseReference.addValueEventListener(object : ValueEventListener {
+        dbRef.child("MessOwners").child(auth.currentUser!!.uid).child("users").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val stulist = mutableListOf<StudentItemModel>()
                 for (postSnapshot in snapshot.children) {
+                    Log.d("FirebaseData", "DataSnapshot: ${postSnapshot.key} => ${postSnapshot.value}")
+
                     val userData = postSnapshot.getValue(StudentItemModel::class.java)
 
                     if (userData != null) {
+                        Log.d("FirebaseData", userData.toString())
+
                         val username = userData.name
                         val userImage = userData.profileImage
                         val userid=userData.userid
@@ -127,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showDialogBox2() {
+    private fun showDialogBox2(messOwnerid: String?) {
         val dialog= Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
@@ -154,14 +155,14 @@ class MainActivity : AppCompatActivity() {
 
             val nameInput=name.editableText.toString()
             val idInput=id.editableText.toString()
-            dbRef.child("UPI").child("name").setValue(nameInput)
-            dbRef.child("UPI").child("UPI_id").setValue(idInput)
+            dbRef.child("MessOwners").child(auth.currentUser!!.uid).child("UPI").child("name").setValue(nameInput)
+            dbRef.child("MessOwners").child(auth.currentUser!!.uid).child("UPI").child("UPI_id").setValue(idInput)
             dialog.dismiss()
         }
         dialog.show()
     }
 
-    private fun showDialogBox1() {
+    private fun showDialogBox1(messName: String?,messOwnerid: String?) {
         val dialog= Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
@@ -182,7 +183,7 @@ class MainActivity : AppCompatActivity() {
             }
             else{
                 val amountinput=amount.editableText.toString()
-                dbRef.child("Rate").setValue(amountinput)
+                dbRef.child("MessOwners").child(auth.currentUser!!.uid).child("Rate").setValue(amountinput)
                 dialog.dismiss()
             }
         }

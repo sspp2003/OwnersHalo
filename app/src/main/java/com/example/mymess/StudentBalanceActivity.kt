@@ -40,7 +40,7 @@ class StudentBalanceActivity : AppCompatActivity() {
         auth=FirebaseAuth.getInstance()
         val userid=intent.getStringExtra("userid")
 
-        val nameRef=databaseReference.child("users").child(userid!!).child("name")
+        val nameRef=databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("users").child(userid!!).child("name")
 
         nameRef.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -58,7 +58,7 @@ class StudentBalanceActivity : AppCompatActivity() {
 
         mAdapter = BalanceAdapter(ballist, object : BalanceAdapter.OnItemClickListener {
             override fun OnPaidClick(balitem: BalanceItemModel) {
-                val balRef = databaseReference.child("balance").child(userid!!).child(balitem.balanceid!!)
+                val balRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("balance").child(userid!!).child(balitem.balanceid!!)
 
                 balRef.removeValue()
                     .addOnSuccessListener {
@@ -79,7 +79,7 @@ class StudentBalanceActivity : AppCompatActivity() {
 
 
         if (userid!=null){
-            val balReference=databaseReference.child("balance").child(userid)
+            val balReference=databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("balance").child(userid)
 
             balReference.addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -135,7 +135,7 @@ class StudentBalanceActivity : AppCompatActivity() {
             }
             else{
                 val amountinput=amount.editableText.toString()
-                databaseReference.child("balance").child(userid).child(balid!!).child("balanceamount").setValue(amountinput)
+                databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("balance").child(userid).child(balid!!).child("balanceamount").setValue(amountinput)
                 dialog.dismiss()
             }
         }

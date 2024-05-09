@@ -38,7 +38,7 @@ class TodayPresentActivity : AppCompatActivity() {
         val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         val currentDate = simpleDateFormat.format(calendar.time)
 
-        val attRef=databaseReference.child("attendance")
+        val attRef=databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance")
 
         mAdapter=TodayStatusAdapter(attlist)
         val recyclerView=binding.todayattRecyclerview
@@ -74,7 +74,7 @@ class TodayPresentActivity : AppCompatActivity() {
     }
 
     private fun fetchUserDetails(userId: String) {
-        val userRef = databaseReference.child("users").child(userId)
+        val userRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("users").child(userId)
 
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

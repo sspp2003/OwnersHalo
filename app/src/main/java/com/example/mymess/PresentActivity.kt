@@ -37,7 +37,7 @@ class PresentActivity : AppCompatActivity() {
             recyclerview.layoutManager = LinearLayoutManager(this)
             recyclerview.adapter = mAdapter
 
-            val attRef = databaseReference.child("attendance").child(userid)
+            val attRef = databaseReference.child("MessOwners").child(auth.currentUser!!.uid).child("attendance").child(userid)
 
             attRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
